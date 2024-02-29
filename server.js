@@ -23,70 +23,71 @@ app.get('/notes', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-  fs.readFile('db.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to read notes from the database.' });
-      return;
-    }
-
-    res.json(JSON.parse(data));
-  });
-});
-
-app.post('/api/notes', (req, res) => {
-  const newNote = {
-    id: uuidv4(),
-    title: req.body.title,
-    text: req.body.text,
-  };
-
-  fs.readFile('db.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to read notes from the database.' });
-      return;
-    }
-
-    const notes = JSON.parse(data);
-    notes.push(newNote);
-
-    fs.writeFile('db.json', JSON.stringify(notes), (err) => {
+    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to save note to the database.' });
+        res.status(500).json({ error: 'Failed to read notes from the database.' });
         return;
       }
-
-      res.json(newNote);
+  
+      res.json(JSON.parse(data));
     });
   });
-});
-
-app.delete('/api/notes/:id', (req, res) => {
-  const id = req.params.id;
-
-  fs.readFile('db.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Failed to read notes from the database.' });
-      return;
-    }
-
-    let notes = JSON.parse(data);
-    notes = notes.filter((note) => note.id !== id);
-
-    fs.writeFile('db.json', JSON.stringify(notes), (err) => {
+  
+  app.post('/api/notes', (req, res) => {
+    const newNote = {
+      id: uuidv4(),
+      title: req.body.title,
+      text: req.body.text,
+    };
+  
+    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to delete note from the database.' });
+        res.status(500).json({ error: 'Failed to read notes from the database.' });
         return;
       }
-
-      res.status(204).end();
+  
+      const notes = JSON.parse(data);
+      notes.push(newNote);
+  
+      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Failed to save note to the database.' });
+          return;
+        }
+  
+        res.json(newNote);
+      });
     });
   });
-});
+  
+  app.delete('/api/notes/:id', (req, res) => {
+    const id = req.params.id;
+  
+    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to read notes from the database.' });
+        return;
+      }
+  
+      let notes = JSON.parse(data);
+      notes = notes.filter((note) => note.id !== id);
+  
+      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Failed to delete note from the database.' });
+          return;
+        }
+  
+        res.status(204).end();
+      });
+    });
+  });
+  
 
 // Start the server
 app.listen(PORT, () => {

@@ -140,10 +140,20 @@ const handleRenderBtns = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = await notes.json();
-  if (window.location.pathname === '/notes') {
-    noteList.forEach((el) => (el.innerHTML = ''));
+  try {
+    let jsonNotes = await notes.json();
+    if (!Array.isArray(jsonNotes)) {
+      console.error('Invalid data format: expected an array');
+      return;
+    }
+
+    // Rest of your code to render the note list
+  } catch (error) {
+    console.error('Error rendering note list:', error);
+    // Optionally, handle the error here
   }
+};
+
 
   let noteListItems = [];
 
