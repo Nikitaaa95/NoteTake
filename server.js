@@ -88,6 +88,7 @@ app.get('/api/notes', (req, res) => {
     });
   });
   
+  
 
 // Start the server
 app.listen(PORT, () => {
