@@ -72,16 +72,27 @@ const renderActiveNote = () => {
   }
 };
 
+//updating to post notes properly
 const handleNoteSave = () => {
   const newNote = {
     title: noteTitle.value,
     text: noteText.value
   };
-  saveNote(newNote).then(() => {
-    getAndRenderNotes();
-    renderActiveNote();
-  });
+  saveNote(newNote)
+    .then(response => response.json())
+    .then(savedNote => {
+      // Update the UI to display the saved note
+      console.log('Note saved successfully:', savedNote);
+      // Optionally, update the UI or perform other actions here
+      getAndRenderNotes(); // Refresh the list of notes
+      renderActiveNote(); // Reset the form
+    })
+    .catch(error => {
+      console.error('Error saving note:', error);
+      // Optionally, handle the error here
+    });
 };
+
 
 // Delete the clicked note
 const handleNoteDelete = (e) => {
