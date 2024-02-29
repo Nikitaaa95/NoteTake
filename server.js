@@ -50,8 +50,8 @@ app.get('/api/notes', (req, res) => {
   
       let notes = JSON.parse(data);
   
-      // Replace placeholder if this is the first note being added
-      if (notes.length === 1 && notes[0].id === 'placeholder') {
+      if (notes.length === 0) {
+        // If the notes array is empty, replace it with the new note
         notes = [newNote];
       } else {
         // Check if a note with the same ID already exists
@@ -77,7 +77,6 @@ app.get('/api/notes', (req, res) => {
       });
     });
   });
-  
   
   
   app.delete('/api/notes/:id', (req, res) => {
