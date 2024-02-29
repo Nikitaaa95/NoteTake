@@ -48,8 +48,18 @@ app.get('/api/notes', (req, res) => {
         return;
       }
   
-      const notes = JSON.parse(data);
-      notes.push(newNote);
+      let notes = JSON.parse(data);
+  
+      // Check if a note with the same ID already exists
+      const existingNoteIndex = notes.findIndex((note) => note.id === newNote.id);
+  
+      if (existingNoteIndex !== -1) {
+        // Update the existing note
+        notes[existingNoteIndex] = newNote;
+      } else {
+        // Add the new note to the array
+        notes.push(newNote);
+      }
   
       fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
         if (err) {
@@ -63,6 +73,7 @@ app.get('/api/notes', (req, res) => {
     });
   });
   
+  
   app.delete('/api/notes/:id', (req, res) => {
     const id = req.params.id;
   
@@ -74,9 +85,14 @@ app.get('/api/notes', (req, res) => {
       }
   
       let notes = JSON.parse(data);
-      notes = notes.filter((note) => note.id !== id);
+      const filteredNotes = notes.filter((note) => note.id !== id);
   
-      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
+      if (notes.length === filteredNotes.length) {
+        res.status(404).json({ error: 'Note not found.' });
+        return;
+      }
+  
+      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(filteredNotes), (err) => {
         if (err) {
           console.error(err);
           res.status(500).json({ error: 'Failed to delete note from the database.' });
@@ -87,6 +103,7 @@ app.get('/api/notes', (req, res) => {
       });
     });
   });
+  
   
   
 
