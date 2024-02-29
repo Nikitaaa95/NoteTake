@@ -26,7 +26,7 @@ const hide = (elem) => {
   elem.style.display = 'none';
 };
 
-// activeNote is used to keep track of the note in the textarea
+// keep track of the note in the textarea
 let activeNote = {};
 
 const getNotes = () =>
@@ -84,13 +84,11 @@ const handleNoteSave = () => {
     .then(savedNote => {
       // Update the UI to display the saved note
       console.log('Note saved successfully:', savedNote);
-      // Optionally, update the UI or perform other actions here
-      getAndRenderNotes(); // Refresh the list of notes
-      renderActiveNote(); // Reset the form
+      getAndRenderNotes();
+      renderActiveNote(); 
     })
     .catch(error => {
       console.error('Error saving note:', error);
-      // Optionally, handle the error here
     });
 };
 
@@ -150,7 +148,7 @@ const handleRenderBtns = () => {
   }
 };
 
-// Render the list of note titles
+// Put together the list of note's titles
 const renderNoteList = async () => {
   try {
     const notes = await getNotes();
@@ -179,11 +177,10 @@ const renderNoteList = async () => {
     });
   } catch (error) {
     console.error('Error rendering note list:', error);
-    // Optionally, handle the error here
   }
 };
 
-// Gets notes from the db and renders them to the sidebar
+// Gets notes from the db and shows them to the sidebar
 const getAndRenderNotes = () => {
   getNotes().then(renderNoteList);
 };
