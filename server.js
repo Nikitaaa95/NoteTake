@@ -12,13 +12,14 @@ app.use(express.json());
 // Serve static files 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
+// Serve pages
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'pages', 'home.html'));
 });
 
+
 app.get('/notes', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'notes.html'));
+  res.sendFile(path.join(__dirname, 'public', 'pages', 'notes.html'));
 });
 
 app.get('/api/notes', (req, res) => {
