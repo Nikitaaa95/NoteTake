@@ -23,94 +23,86 @@ app.get('/notes', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+  fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to read notes from the database.' });
+      return;
+    }
+
+    res.json(JSON.parse(data));
+  });
+});
+
+app.post('/api/notes', (req, res) => {
+  const newNote = {
+    id: uuidv4(),
+    title: req.body.title,
+    text: req.body.text,
+  };
+
+  fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to read notes from the database.' });
+      return;
+    }
+
+    let notes = JSON.parse(data);
+
+    // Check if a note with the same ID already exists
+    const existingNoteIndex = notes.findIndex((note) => note.id === newNote.id);
+
+    if (existingNoteIndex !== -1) {
+      // Update the existing note
+      notes[existingNoteIndex] = newNote;
+    } else {
+      // Add the new note to the array
+      notes.push(newNote);
+    }
+
+    fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to read notes from the database.' });
+        res.status(500).json({ error: 'Failed to save note to the database.' });
         return;
       }
-  
-      res.json(JSON.parse(data));
+
+      res.json(newNote);
     });
   });
-  
-  app.post('/api/notes', (req, res) => {
-    const newNote = {
-      id: uuidv4(),
-      title: req.body.title,
-      text: req.body.text,
-    };
-  
-    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+});
+
+
+app.delete('/api/notes/:id', (req, res) => {
+  const id = req.params.id;
+
+  fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to read notes from the database.' });
+      return;
+    }
+
+    let notes = JSON.parse(data);
+    const filteredNotes = notes.filter((note) => note.id !== id);
+
+    if (notes.length === filteredNotes.length) {
+      res.status(404).json({ error: 'Note not found.' });
+      return;
+    }
+
+    fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(filteredNotes), (err) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Failed to read notes from the database.' });
+        res.status(500).json({ error: 'Failed to delete note from the database.' });
         return;
       }
-  
-      let notes = JSON.parse(data);
-  
-      if (notes.length === 0) {
-        // If the notes array is empty, replace it with the new note
-        notes = [newNote];
-      } else {
-        // Check if a note with the same ID already exists
-        const existingNoteIndex = notes.findIndex((note) => note.id === newNote.id);
-  
-        if (existingNoteIndex !== -1) {
-          // Update the existing note
-          notes[existingNoteIndex] = newNote;
-        } else {
-          // Add the new note to the array
-          notes.push(newNote);
-        }
-      }
-  
-      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
-        if (err) {
-          console.error(err);
-          res.status(500).json({ error: 'Failed to save note to the database.' });
-          return;
-        }
-  
-        res.json(newNote);
-      });
+
+      res.status(204).end();
     });
   });
-  
-  
-  app.delete('/api/notes/:id', (req, res) => {
-    const id = req.params.id;
-  
-    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to read notes from the database.' });
-        return;
-      }
-  
-      let notes = JSON.parse(data);
-      const filteredNotes = notes.filter((note) => note.id !== id);
-  
-      if (notes.length === filteredNotes.length) {
-        res.status(404).json({ error: 'Note not found.' });
-        return;
-      }
-  
-      fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(filteredNotes), (err) => {
-        if (err) {
-          console.error(err);
-          res.status(500).json({ error: 'Failed to delete note from the database.' });
-          return;
-        }
-  
-        res.status(204).end();
-      });
-    });
-  });
-  
-  
-  
+});
 
 // Start the server
 app.listen(PORT, () => {
