@@ -127,6 +127,17 @@ const handleNewNoteView = (e) => {
   renderActiveNote();
 };
 
+// Clear the form fields
+const handleClearForm = () => {
+  noteTitle.value = '';
+  noteText.value = '';
+  renderActiveNote();
+};
+
+// Event listener for the clear button
+clearBtn.addEventListener('click', handleClearForm);
+
+
 // Renders the appropriate buttons based on the state of the form
 const handleRenderBtns = () => {
   show(clearBtn);
