@@ -50,15 +50,20 @@ app.get('/api/notes', (req, res) => {
   
       let notes = JSON.parse(data);
   
-      // Check if a note with the same ID already exists
-      const existingNoteIndex = notes.findIndex((note) => note.id === newNote.id);
-  
-      if (existingNoteIndex !== -1) {
-        // Update the existing note
-        notes[existingNoteIndex] = newNote;
+      // Replace placeholder if this is the first note being added
+      if (notes.length === 1 && notes[0].id === 'placeholder') {
+        notes = [newNote];
       } else {
-        // Add the new note to the array
-        notes.push(newNote);
+        // Check if a note with the same ID already exists
+        const existingNoteIndex = notes.findIndex((note) => note.id === newNote.id);
+  
+        if (existingNoteIndex !== -1) {
+          // Update the existing note
+          notes[existingNoteIndex] = newNote;
+        } else {
+          // Add the new note to the array
+          notes.push(newNote);
+        }
       }
   
       fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes), (err) => {
@@ -72,6 +77,7 @@ app.get('/api/notes', (req, res) => {
       });
     });
   });
+  
   
   
   app.delete('/api/notes/:id', (req, res) => {
