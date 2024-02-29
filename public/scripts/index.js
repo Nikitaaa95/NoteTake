@@ -3,6 +3,7 @@ let noteTitle;
 let noteText;
 let saveNoteBtn;
 let newNoteBtn;
+let clearBtn;
 let noteList;
 
 if (window.location.pathname === '/notes') {
@@ -12,7 +13,7 @@ if (window.location.pathname === '/notes') {
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   clearBtn = document.querySelector('.clear-btn');
-  noteList = document.querySelectorAll('.list-container .list-group');
+  noteList = document.querySelector('.list-group');
 }
 
 // Show an element
@@ -99,8 +100,8 @@ const handleNoteDelete = (e) => {
   // Prevents the click listener for the list from being called when the button inside of it is clicked
   e.stopPropagation();
 
-  const note = e.target;
-  const noteId = JSON.parse(note.parentElement.getAttribute('data-note')).id;
+  const note = e.target.parentElement;
+  const noteId = JSON.parse(note.getAttribute('data-note')).id;
 
   if (activeNote.id === noteId) {
     activeNote = {};
@@ -139,77 +140,46 @@ const handleRenderBtns = () => {
 };
 
 // Render the list of note titles
-const renderNoteList = async (notes) => {
+const renderNoteList = async () => {
   try {
-    let jsonNotes = await notes.json();
+    const notes = await getNotes();
+    const jsonNotes = await notes.json();
+
+    noteList.innerHTML = '';
+
     if (!Array.isArray(jsonNotes)) {
       console.error('Invalid data format: expected an array');
       return;
     }
 
-    let noteListItems = [];
-
-    // Returns HTML element with or without a delete button
-    const createLi = (text, delBtn = true) => {
-      const liEl = document.createElement('li');
-      liEl.classList.add('list-group-item');
-  
-      const spanEl = document.createElement('span');
-      spanEl.classList.add('list-item-title');
-      spanEl.innerText = text;
-      spanEl.addEventListener('click', handleNoteView);
-  
-      liEl.append(spanEl);
-  
-      if (delBtn) {
-        const delBtnEl = document.createElement('i');
-        delBtnEl.classList.add(
-          'fas',
-          'fa-trash-alt',
-          'float-right',
-          'text-danger',
-          'delete-note'
-        );
-        delBtnEl.addEventListener('click', handleNoteDelete);
-  
-        liEl.append(delBtnEl);
-      }
-  
-      return liEl;
-    };
-  
     if (jsonNotes.length === 0) {
-      noteListItems.push(createLi('No saved Notes', false));
+      noteList.innerHTML = '<li class="list-group-item">No saved Notes</li>';
+      return;
     }
-  
-    jsonNotes.forEach((note) => {
-      const li = createLi(note.title);
-      li.dataset.note = JSON.stringify(note);
-  
-      noteListItems.push(li);
-    });
-  
-    if (window.location.pathname === '/notes') {
-      noteListItems.forEach((note) => noteList[0].append(note));
-    };
 
-    // Rest of your code to render the note list
+    jsonNotes.forEach((note) => {
+      const li = document.createElement('li');
+      li.classList.add('list-group-item');
+      li.innerHTML = `<span class="list-item-title">${note.title}</span><i class="fas fa-trash-alt float-right text-danger delete-note"></i>`;
+      li.setAttribute('data-note', JSON.stringify(note));
+      li.querySelector('.list-item-title').addEventListener('click', handleNoteView);
+      li.querySelector('.delete-note').addEventListener('click', handleNoteDelete);
+      noteList.appendChild(li);
+    });
   } catch (error) {
     console.error('Error rendering note list:', error);
     // Optionally, handle the error here
   }
 };
 
-
-
-
 // Gets notes from the db and renders them to the sidebar
-const getAndRenderNotes = () => getNotes().then(renderNoteList);
+const getAndRenderNotes = () => {
+  getNotes().then(renderNoteList);
+};
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave);
   newNoteBtn.addEventListener('click', handleNewNoteView);
-  clearBtn.addEventListener('click', renderActiveNote);
   noteForm.addEventListener('input', handleRenderBtns);
 }
 
